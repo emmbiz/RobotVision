@@ -33,7 +33,7 @@ gray = cv2.GaussianBlur(gray, (7, 7), 0)
 cv2.imshow('gray', gray)
 cv2.waitKey()
 
-# Perform edge detection, then perform a dilation + erosion to
+# Perform edge detection, then perform dilation + erosion to
 # close gaps in between object edges
 edged = cv2.Canny(gray, 50, 100)
 edged = cv2.dilate(edged, None, iterations=1)
@@ -46,7 +46,6 @@ cv2.waitKey()
 cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
                         cv2.CHAIN_APPROX_SIMPLE)
 
-#cnts = cnts[0] if imutils.is_cv2() else cnts[1]
 cnts = imutils.grab_contours(cnts)
 
 # Sort the contours from left-to-right and initialize the
@@ -66,7 +65,6 @@ for c in cnts:
     # Compute the rotated bounding box of the contour
     orig = image.copy()
     box = cv2.minAreaRect(c)
-    #box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
     box = cv2.boxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
     box = np.array(box, dtype="int")
 
@@ -81,58 +79,54 @@ for c in cnts:
     for (x, y) in box:
         cv2.circle(orig, (int(x), int(y)), 5, (0, 0, 255), -1)
 
-    # unpack the ordered bounding box, then compute the midpoint
+    # Unpack the ordered bounding box, then compute the mid-point
     # between the top-left and top-right coordinates, followed by
-    # the midpoint between bottom-left and bottom-right coordinates
+    # the mid-point between bottom-left and bottom-right coordinates
     (tl, tr, br, bl) = box
     (tltrX, tltrY) = midpoint(tl, tr)
     (blbrX, blbrY) = midpoint(bl, br)
 
-    # compute the midpoint between the top-left and bottom-right points,
-    # followed by the midpoint between the top-right and bottom-right
+    # Compute the mid-point between the top-left and bottom-right points,
+    # followed by the mid-point between the top-right and bottom-right
     (tlblX, tlblY) = midpoint(tl, bl)
     (trbrX, trbrY) = midpoint(tr, br)
 
-    # draw the midpoints on the image
+    # Draw the mid-points on the image
     cv2.circle(orig, (int(tltrX), int(tltrY)), 5, (255, 0, 0), -1)
     cv2.circle(orig, (int(blbrX), int(blbrY)), 5, (255, 0, 0), -1)
     cv2.circle(orig, (int(tlblX), int(tlblY)), 5, (255, 0, 0), -1)
     cv2.circle(orig, (int(trbrX), int(trbrY)), 5, (255, 0, 0), -1)
 
-    # draw lines between the midpoints
+    # Draw lines between the mid-points
     cv2.line(orig, (int(tltrX), int(tltrY)), (int(blbrX), int(blbrY)),
              (255, 0, 255), 2)
     cv2.line(orig, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)),
              (255, 0, 255), 2)
 
-    # compute angle at which to pick up object
+    # Compute angle at which to pick up object
     angle = int(math.atan((-tlblY + trbrY) / (trbrX - tlblX)) * 180 / math.pi)
 
-    # find midpoint of the bounding box for picking object
+    # Find mid-point of the bounding box for picking object
     (pickX, pickY) = midpoint(tl, br)
     centerP.append([pickX, pickY, angle])
 
-    # compute the Euclidean distance between the midpoints
+    # Compute the Euclidean distance between the mid-points
     dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
     dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
-
-    # if the pixels per metric has not been initialized, then
-    # compute it as the ratio of pixels to supplied metric
-    # (in this case, inches)
 
     if dB >= dA:
         angle = angle + 90
     print('Angle = ', angle) ##
 
-    # compute the size of the object
+    # Compute the size of the object
     dimA = dA / pixelsPerMetric
     dimB = dB / pixelsPerMetric
 
-    # store values in an array for further processing
+    # Store values in an array for further processing
     store1.append(dimA)
     store2.append(dimB)
 
-    # draw the object sizes on the image
+    # Draw the object sizes on the image
     cv2.putText(orig, "{:.1f}in".format(dimA),
                 (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
                 0.65, (255, 255, 255), 2)
@@ -140,13 +134,13 @@ for c in cnts:
                 (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
                 0.65, (255, 255, 255), 2)
 
-    # show the output image
+    # Show the output image
     cv2.imshow("Image", orig)
     cv2.waitKey(0)
 
 centerP = array(centerP)
 
-print("pick point and angle")
+print("Pick point and angle")
 print(centerP)
 
 store = []
@@ -157,17 +151,8 @@ for m in range(len(store1)):
 for n in range(len(store1)):
     rectangles.append([store2[n], store1[n], rid[n]])
 
-##
-#print(rectangles)
-#print("rid = %s " %rid)
-#rectangles = store + rid
-#print(" rect list = %s" %rectangles)
-##
-
 for i in rectangles:
     print(i)
-# rid = [ 1, 2, 3]
-# rectangles = store
 
 ##################################################################
 # Bin packing algorithm
@@ -220,16 +205,10 @@ rectfinal = array(rectfinal)
 print(rectfinal)
 print(type(rectfinal))
 
-##
-for i in rectfinal:
-    print('after computing')
-    print(i)
-##
-
-# id sequence after computing
+# ID sequence after computing
 print(ind)
 
-# Use OpenCV to visualize bin packing
+# Visualize bin packing
 rectsim = rectfinal.astype(int)
 sim = np.zeros((100, 100, 3), np.uint8)
 for i in range(len(rectsim)):
@@ -239,7 +218,7 @@ for i in range(len(rectsim)):
     cv2.imshow('sim', sim)
     cv2.waitKey()
 
-# create a list of final packed bin with angle
+# Create a list of final packed bin with angle
 fp = []
 for i in range(len(rectangles)):
     for j in range(len(rectfinal)):
@@ -253,10 +232,9 @@ for i in range(len(rectangles)):
 
 print('length    height    angles')
 for i in range(len(rectangles)):
-    print("\n\nI ->\n", i)
     print("{:6f}    {:6f}   {:6f}".format(fp[i][0], fp[i][1], fp[i][2]))
 
-# check for rotation
+# Check for rotation
 fl = []
 for i in range(len(rectfinal)):
     for j in range(len(rectangles)):
@@ -276,7 +254,7 @@ for i in range(len(rectfinal)):
 
 ########################################################################
 
-# initialize socket connection with cobot
+# Initialize socket connection with UR5
 HOST = "192.168.56.102"  # The remote host
 PORT = 30000  # The same port as used by the server
 print("Starting Program")
