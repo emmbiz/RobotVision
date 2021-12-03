@@ -1,7 +1,7 @@
 # RobotVision
 This is an implementation of a 2D packing system by integrating a vision system (Raspberry Pi 3 and Camera Module V2) to a UR5 robot arm manipulator for effective and efficient packing solution of multiple shaped objects without human intervention.
 
-The implementation steps involves:
+The implementation steps involves:-
 1. Determining the shape, size, angle and location of objects for packing.
 2. Solving the 2D bin packing problem to find the optimal packing solution.
 3. Transmitting data for communication between Raspberry Pi and UR5 robot.
